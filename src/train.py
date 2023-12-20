@@ -12,7 +12,7 @@ def main():
 
     train_data, val_data, test_data = dataloader()
 
-    with open('../configs/hyperparameters.yaml', 'r') as file:
+    with open('configs/hyperparameters.yaml', 'r') as file:
         hyperparameters = yaml.safe_load(file)
 
     reduction = hyperparameters['criterion']['reduction']
@@ -27,20 +27,20 @@ def main():
 
     encoder = Encoder().to(device)
     decoder = Decoder().to(device)
-    model = peptide2RT(encoder, decoder).to(device)
+    autoencoder = peptide2RT(encoder, decoder).to(device)
     criterion = nn.HuberLoss(reduction=reduction, delta=delta)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    optimizer = torch.optim.Adam(autoencoder.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = ReduceLROnPlateau(optimizer, mode=mode, factor=factor, patience=patience, verbose=True, min_lr=min_lr)
 
     torch.cuda.empty_cache()
 
     for epoch in range(1, epochs+1):
-        model.train()
+        autoencoder.train()
         training_losses = []
         scaled_train_losses = []
         for feature, label in train_data:
             optimizer.zero_grad()
-            y_pred = model(feature.to(device))
+            y_pred = autoencoder(feature.to(device))
             y_pred = y_pred.squeeze(1, 2)
             training_loss = criterion(y_pred, label.to(device))
             scaled_train_loss = criterion(y_pred * 20000, (label * 20000).to(device))
@@ -54,7 +54,7 @@ def main():
         scaled_val_losses = []
         with torch.no_grad():
             for feature, label in val_data:
-                y_pred = model(feature.to(device))
+                y_pred = autoencoder(feature.to(device))
                 y_pred = y_pred.squeeze(1, 2)
                 val_loss = criterion(y_pred, label.to(device))
                 scaled_val_loss = criterion(y_pred * 20000, (label * 20000).to(device))

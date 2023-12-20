@@ -1,5 +1,4 @@
 import torch.nn as nn
-from train import encoder, decoder
 
 class ConvBlock(nn.Module):
     def __init__(self, input_size, output_size, kernel_size, stride):
@@ -47,6 +46,6 @@ class peptide2RT(nn.Module):
         self.decoder = decoder
         
     def forward(self, x):
-        output, hn, cn = encoder(x)
-        output = decoder(output)
+        output, hn, cn = self.encoder(x)
+        output = self.decoder(output)
         return output

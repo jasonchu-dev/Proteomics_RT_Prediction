@@ -17,7 +17,7 @@ class CustomDataset(Dataset):
         label = self.labels[idx]
         return feature, label
 
-def dataLoader():
+def dataloader():
     df = pd.read_csv('unmod.txt', sep='\t')
     df.sample(frac=1, random_state=42).reset_index(drop=True)
 

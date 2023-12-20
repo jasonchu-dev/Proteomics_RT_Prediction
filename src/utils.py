@@ -1,4 +1,5 @@
 import torch
+from model import Encoder, Decoder, peptide2RT
 
 def normalize_neg_one_2_one(y):
     upper_bound = 10000
@@ -41,3 +42,11 @@ def format_number(num, length=20):
         formatted_num = num_str
     formatted_num = formatted_num.ljust(length, '0')
     return formatted_num
+
+def load_model():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    encoder = Encoder().to(device)
+    decoder = Decoder().to(device)
+    autoencoder = peptide2RT(encoder, decoder).to(device)
+    checkpoint = torch.load('model.tar', map_location=device)
+    return autoencoder
