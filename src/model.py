@@ -1,8 +1,20 @@
-import torch
 import torch.nn as nn
+from train import encoder, decoder
 
+class ConvBlock(nn.Module):
+    def __init__(self, input_size, output_size, kernel_size, stride):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Conv1d(input_size, output_size, kernel_size, stride),
+            nn.BatchNorm1d(output_size),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.model(x)
+        
 class Encoder(nn.Module):
-    def __init__(self, input_size=21, hidden_size=64, num_layers=2, embedding_size=10, dropout=0.05, output_size=20):
+    def __init__(self, input_size=21, hidden_size=128, num_layers=2, embedding_size=10, dropout=0.3):
         super().__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size
@@ -20,18 +32,12 @@ class Decoder(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Conv1d(38, 21, kernel_size=6, stride=2), # 64 -> 30
-            nn.BatchNorm1d(21),
-            nn.Sigmoid(),
-            nn.Conv1d(21, 10, kernel_size=6, stride=3), # 30 -> 9
-            nn.BatchNorm1d(10),
-            nn.Sigmoid(),
-            nn.Conv1d(10, 1, kernel_size=9, stride=1), # 9 -> 1
-            nn.BatchNorm1d(1),
-            nn.Sigmoid()
+            ConvBlock(38, 24, 6, 2),
+            ConvBlock(24, 12, 6, 5),
+            ConvBlock(12, 1, 12, 1)
         )
         
-    def forward(self, x):
+    def forward(self, x):        
         return self.model(x)
     
 class peptide2RT(nn.Module):

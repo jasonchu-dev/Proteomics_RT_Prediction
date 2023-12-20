@@ -1,0 +1,13 @@
+criterion:
+  reduction: 'sum'
+  delta: 0.5
+optimizer:
+  lr: 0.1
+  weight_decay: 0.01
+scheduler:
+  mode: 'min'
+  factor: 0.1
+  patience: 100
+  min_lr: 0.001
+epochs:
+  epochs: 50
